@@ -12,16 +12,9 @@ ws_clients: Dict[str, WebSocket] = {}
 # async def send_info_to_client(ws_client: WebSocket, data: bytes) -> None:
 #     await ws_client.send_json({"recevied": str(data), "from": ws_client.client.host})
 
-
-class MyUDPProtocol(asyncio.DatagramProtocol):
-    def connection_made(self, transport: asyncio.DatagramTransport) -> None:
-        self.transport = transport
-
-    def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
-        print('Received', data[0:4])
-        # ws_client = ws_clients[addr[0]]
-        # asyncio.create_task(send_info_to_client(ws_client, data))
-
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 @app.websocket_route("/ws-route")
 class MyWSEndpoint(WebSocketEndpoint):
@@ -46,3 +39,13 @@ async def on_startup() -> None:
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
     app.state.udp_transport.close()
+
+# UDP
+class MyUDPProtocol(asyncio.DatagramProtocol):
+    def connection_made(self, transport: asyncio.DatagramTransport) -> None:
+        self.transport = transport
+
+    def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
+        print('Received', data[0:4])
+        # ws_client = ws_clients[addr[0]]
+        # asyncio.create_task(send_info_to_client(ws_client, data))
